@@ -1,6 +1,16 @@
 import streamlit as st
 from fpdf import FPDF
 import io
+import random
+import string
+import datetime
+
+# --- DYNAMIC INITIALIZATION LOGIC ---
+# Using session_state to securely hold a dynamic transaction token across page interactions
+if 'transaction_id' not in st.session_state:
+    # Generates a standard banking tracking reference string (e.g., TXN-83920174-FT)
+    random_digits = "".join(random.choices(string.digits, k=8))
+    st.session_state.transaction_id = f"TXN-{random_digits}-FT"
 
 class ReceiptPDF(FPDF):
     def header(self):
@@ -36,7 +46,7 @@ st.set_page_config(page_title="Avant Finance Receipt Generator", page_icon="📄
 st.title("📄 Avant Finance — Wire Transfer Receipt Generator")
 st.write("Fill out the transaction ledger parameters below to render a secure verification document.")
 
-# Layout organization (Fixed: Passed integer '2' to create two columns)
+# Layout organization
 col1, col2 = st.columns(2)
 
 with col1:
@@ -55,12 +65,21 @@ with col1:
     total_loan_deposited = loan_amount - processing_fees
 
 with col2:
-    st.subheader("📞 Corporate Contact Configuration")
-    st.info("The parameters below will populate the dedicated Support Section inside the PDF output matrix.")
+    st.subheader("📋 System Parameters & Contact Details")
     
-    support_phone = st.text_input("Support Phone Line", "1-800-555-0199")
-    support_email = st.text_input("Support Email Address", "support@avantfinance-portal.com")
-    corp_address = st.text_area("Corporate HQ Address", "Avant Finance HQ\n222 W Merchandise Mart Plaza\nChicago, IL 60654")
+    # Visual validation showing reference mappings directly inside the user interface
+    st.text_input("Fixed Loan ID Block Reference", value="AFPL21102026", disabled=True)
+    st.text_input("Dynamic Transaction Reference (Auto)", value=st.session_state.transaction_id, disabled=True)
+    
+    if st.button("🔄 Generate Fresh Transaction ID"):
+        random_digits = "".join(random.choices(string.digits, k=8))
+        st.session_state.transaction_id = f"TXN-{random_digits}-FT"
+        st.rerun()
+
+    st.markdown("---")
+    support_phone = st.text_input("Support Phone Line", "(618)-506-0157")
+    support_email = st.text_input("Support Email Address", "accounts@avantloans.online")
+    corp_address = st.text_area("Corporate HQ Address", "Avant Finance HQ\n111 W Merchandise Mart Plaza\nChicago, IL 60654")
 
 st.markdown("---")
 
@@ -77,7 +96,7 @@ if st.button("🚀 Render & Compile PDF Document"):
         pdf.set_xy(15, 44)
         pdf.set_font("Helvetica", "B", 11)
         pdf.set_text_color(40, 167, 69) # Green success text
-        pdf.cell(0, 7, "TRANSACTION STATUS: SETTLED / WIRE SENT SUCCESSFUL", ln=True)
+        pdf.cell(0, 7, f"TRANSACTION STATUS: SETTLED / WIRE SENT SUCCESSFUL", ln=True)
         
         pdf.ln(10)
         
@@ -88,7 +107,7 @@ if st.button("🚀 Render & Compile PDF Document"):
         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
         pdf.ln(4)
         
-        # Customer Data Grid Mapping
+        # Mapping complete system parameters matrix 
         pdf.set_font("Helvetica", "", 10)
         pdf.set_text_color(50, 50, 50)
         
@@ -96,12 +115,15 @@ if st.button("🚀 Render & Compile PDF Document"):
             ("Customer Name:", customer_name),
             ("Destination Bank:", bank_name),
             ("Account Number:", account_num),
-            ("Routing Number:", routing_num)
+            ("Routing Number:", routing_num),
+            ("Fixed Loan ID Reference:", "AFPL21102026"),
+            ("Dynamic Transaction ID:", st.session_state.transaction_id),
+            ("Settlement Date Stamp:", datetime.date.today().strftime("%B %d, %Y"))
         ]
         
         for label, val in data_matrix:
             pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(45, 7, label, border=0)
+            pdf.cell(50, 7, label, border=0)
             pdf.set_font("Helvetica", "", 10)
             pdf.cell(0, 7, str(val), ln=True, border=0)
             
