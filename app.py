@@ -171,11 +171,16 @@ if st.button("🚀 Render & Compile PDF Document"):
         pdf_output = pdf.output(dest='S')
         
         st.success("🎉 Receipt successfully built!")
-        st.download_button(
-            label="💾 Download Signed Receipt PDF File",
-            data=bytes(pdf_output),
-            file_name="avant_wire_transfer_receipt.pdf",
-            mime="application/pdf"
+        # Convert spaces to underscores and make lowercase for a clean filename
+clean_filename = f"{customer_name.replace(' ', '_').lower()}_wire_transfer_receipt.pdf"
+
+st.download_button(
+    label="💾 Download Signed Receipt PDF File",
+    data=bytes(pdf_output),
+    file_name=clean_filename,  # <-- Dynamic filename based on user input
+    mime="application/pdf"
+)
+
         )
     except Exception as e:
         st.error(f"An operation compile failure occurred: {str(e)}")
