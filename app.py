@@ -37,7 +37,7 @@ st.title("📄 Avant Finance — Wire Transfer Receipt Generator")
 st.write("Fill out the transaction ledger parameters below to render a secure verification document.")
 
 # Layout organization
-col1, col2 = st.columns([1, 1])
+col1, col2 = st.columns()
 
 with col1:
     st.subheader("🏦 Transaction & Banking Ledger")
@@ -64,7 +64,7 @@ with col2:
 
 st.markdown("---")
 
-# --- PDF GENERATION GENERATOR ENGINE ---
+# --- PDF GENERATION ENGINE ---
 if st.button("🚀 Render & Compile PDF Document"):
     try:
         pdf = ReceiptPDF(orientation="P", unit="mm", format="A4")
@@ -170,17 +170,18 @@ if st.button("🚀 Render & Compile PDF Document"):
         # Output binary object string to system memory stream download buffer
         pdf_output = pdf.output(dest='S')
         
+        # Sanitize name to generate a clean, download-friendly filename
+        clean_name = customer_name.strip().replace(" ", "_").lower()
+        if not clean_name:
+            clean_name = "customer"
+        formatted_filename = f"{clean_name}_wire_transfer_receipt.pdf"
+        
         st.success("🎉 Receipt successfully built!")
-        # Convert spaces to underscores and make lowercase for a clean filename
-clean_filename = f"{customer_name.replace(' ', '_').lower()}_wire_transfer_receipt.pdf"
-
-st.download_button(
-    label="💾 Download Signed Receipt PDF File",
-    data=bytes(pdf_output),
-    file_name=clean_filename,  # <-- Dynamic filename based on user input
-    mime="application/pdf"
-)
-
+        st.download_button(
+            label="💾 Download Signed Receipt PDF File",
+            data=bytes(pdf_output),
+            file_name=formatted_filename,
+            mime="application/pdf"
         )
     except Exception as e:
         st.error(f"An operation compile failure occurred: {str(e)}")
