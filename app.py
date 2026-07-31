@@ -36,8 +36,8 @@ st.set_page_config(page_title="Avant Finance Receipt Generator", page_icon="📄
 st.title("📄 Avant Finance — Wire Transfer Receipt Generator")
 st.write("Fill out the transaction ledger parameters below to render a secure verification document.")
 
-# Layout organization
-col1, col2 = st.columns()
+# Layout organization (Fixed: Passed integer '2' to create two columns)
+col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("🏦 Transaction & Banking Ledger")
